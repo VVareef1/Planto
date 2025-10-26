@@ -12,6 +12,7 @@ struct SetUp: View {
                     .environmentObject(store)
             } else {
                 // إذا فيه نباتات → عرض الصفحة الرئيسية
+                //jhjhjhjhjhjhjhjhjhjhj
                 TodayReminder()
                     .environmentObject(store)
             }
