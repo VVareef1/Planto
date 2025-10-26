@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct PlantoApp: App {
+    @StateObject private var store = PlantStore()
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +26,9 @@ struct PlantoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SetUp()
+                .environmentObject(store)
+                .preferredColorScheme(ColorScheme.dark)
         }
         .modelContainer(sharedModelContainer)
     }
