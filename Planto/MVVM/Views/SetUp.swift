@@ -1,20 +1,34 @@
-//
-//  ContentView.swift
-//  Planto
-//
-//  Created by Wareef Saeed Alzahrani on 24/04/1447 AH.
-//
 import SwiftUI
-import SwiftData
 
 struct SetUp: View {
     @State private var showSheet = false
     @EnvironmentObject var store: PlantStore
     
     var body: some View {
-        
+        Group {
+            if store.plants.isEmpty {
+                // إذا ما فيه نباتات → عرض الترحيب
+                WelcomeView(showSheet: $showSheet)
+                    .environmentObject(store)
+            } else {
+                // إذا فيه نباتات → عرض الصفحة الرئيسية
+                TodayReminder()
+                    .environmentObject(store)
+            }
+        }
+        .animation(.easeInOut(duration: 0.5), value: store.plants.isEmpty)
+    }
+}
+
+// MARK: - Welcome View
+struct WelcomeView: View {
+    @Binding var showSheet: Bool
+    @EnvironmentObject var store: PlantStore
+    
+    var body: some View {
         ZStack {
- 
+            Color.black
+                .ignoresSafeArea()
             
             VStack {
                 VStack(alignment: .leading) {
@@ -31,7 +45,6 @@ struct SetUp: View {
                         .padding(.horizontal, 20)
                 }
                 .frame(maxWidth: .infinity, alignment: .topLeading)
-                
                 
                 VStack(spacing: 40) {
                     Image("plant_pot")
@@ -52,45 +65,33 @@ struct SetUp: View {
                             .foregroundColor(Color.white.opacity(0.7))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 30)
-                        
                     }
                     
-                    GlassEffectContainer {
-                        Button(action: {
-                            showSheet.toggle()
-                        }) {
-                            Text("Set Plant Reminder")
-                                .font(.system(size: 17, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.lightGreen)
-                                .foregroundColor(.white)
-                                .shadow(radius: 6, y: 3)
-                                .frame(width: 280, height: 44)
-                                .cornerRadius(60)
-                        }
-                        .glassEffect()
-                        .sheet(isPresented: $showSheet) {
-                            SetReminder()
-                                .environmentObject(store)
-                                .ignoresSafeArea()
-                        }
+                    Button(action: {
+                        showSheet.toggle()
+                    }) {
+                        Text("Set Plant Reminder")
+                            .font(.system(size: 17, weight: .semibold))
+                            .frame(width: 280, height: 44)
+                            .background(Color.lightGreen)
+                            .foregroundColor(.white)
+                            .cornerRadius(60)
+                            .shadow(radius: 6, y: 3)
                     }
-
+                    .sheet(isPresented: $showSheet) {
+                        SetReminder()
+                            .environmentObject(store)
                     }
-                    
-                    .frame(maxWidth: .infinity, alignment: .center)                    
-                    Spacer()
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                Spacer()
             }
-            
         }
     }
-    
-    
-    #Preview {
-        SetUp()
-            .environmentObject(PlantStore())
+}
 
-    }
-
+#Preview {
+    SetUp()
+        .environmentObject(PlantStore())
+}
