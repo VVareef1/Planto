@@ -3,21 +3,22 @@ import SwiftUI
 struct SetUp: View {
     @State private var showSheet = false
     @EnvironmentObject var store: PlantStore
+    @StateObject private var notificationVM = NotificationViewModel()  // ← هذا السطر جديد
     
     var body: some View {
         Group {
             if store.plants.isEmpty {
-                // إذا ما فيه نباتات → عرض الترحيب
                 WelcomeView(showSheet: $showSheet)
                     .environmentObject(store)
             } else {
-                // إذا فيه نباتات → عرض الصفحة الرئيسية
-                //jhjhjhjhjhjhjhjhjhjhj
                 TodayReminder()
                     .environmentObject(store)
             }
         }
         .animation(.easeInOut(duration: 0.5), value: store.plants.isEmpty)
+        .onAppear {
+            notificationVM.requestPermission()  // ← هذا السطر جديد
+        }
     }
 }
 

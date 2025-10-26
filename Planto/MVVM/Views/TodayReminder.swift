@@ -2,22 +2,24 @@
 //  TodayReminder.swift
 //  Planto
 //
-//  Created by Wareef Saeed Alzahrani on 28/04/1447 AH.
-//
+
 import SwiftUI
 
 struct TodayReminder: View {
     @EnvironmentObject var store: PlantStore
     @State private var showAddSheet = false
     @State private var plantToEdit: Plant? = nil
+    
     private var wateredCount: Int {
         store.plants.filter { $0.isWatered }.count
     }
-        private var progress: Double {
+    
+    private var progress: Double {
         guard !store.plants.isEmpty else { return 0 }
         return Double(wateredCount) / Double(store.plants.count)
     }
-        private var headerMessage: String {
+    
+    private var headerMessage: String {
         if store.plants.isEmpty {
             return "Add your first plant 🌱"
         } else if wateredCount == 0 {
@@ -29,56 +31,67 @@ struct TodayReminder: View {
         }
     }
     
+    // ← جديد: تحقق إذا كل النباتات مسقية
+    private var allPlantsWatered: Bool {
+        !store.plants.isEmpty && store.plants.allSatisfy { $0.isWatered }
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
-                VStack(spacing: 0) {
-                    // MARK: - Header Message
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(headerMessage)
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
-                        
-                        // MARK: - Progress Bar
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: 361, height: 8)
-                                .cornerRadius(8)
+                // ← جديد: إذا كل النباتات مسقية
+                if allPlantsWatered {
+                    AllDoneView()
+                } else {
+                    // الصفحة العادية
+                    VStack(spacing: 0) {
+                        // MARK: - Header Message
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(headerMessage)
+                                .font(.system(size: 17))
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
                             
-                            Rectangle()
-                                .fill(Color.greeny)
-                                .frame(width: 361 * progress, height: 8)
-                                .cornerRadius(8)
-                                .animation(.spring(), value: progress)
+                            // MARK: - Progress Bar
+                            ZStack(alignment: .leading) {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 361, height: 8)
+                                    .cornerRadius(8)
+                                
+                                Rectangle()
+                                    .fill(Color.greeny)
+                                    .frame(width: 361 * progress, height: 8)
+                                    .cornerRadius(8)
+                                    .animation(.spring(), value: progress)
+                            }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
-                    }
-                    .padding(.top, 8)
-                    
-                    //Plants List
-                    List {
-                        ForEach(store.plants) { plant in
-                            PlantRowView(plant: plant, onEdit: {
-                                plantToEdit = plant
-                            })
-                            .listRowInsets(EdgeInsets())
-                            .environmentObject(store)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deletePlant(plant)
-                                } label: {
-                                    Label("Delete", systemImage: "trash.fill")
+                        .padding(.top, 8)
+                        
+                        // MARK: - Plants List
+                        List {
+                            ForEach(store.plants) { plant in
+                                PlantRowView(plant: plant, onEdit: {
+                                    plantToEdit = plant
+                                })
+                                .listRowInsets(EdgeInsets())
+                                .environmentObject(store)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        deletePlant(plant)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash.fill")
+                                    }
                                 }
                             }
                         }
+                        .listStyle(.plain)
                     }
-                    .listStyle(.plain)
                 }
                 
-                //Add Button
+                // MARK: - Add Button (دايماً موجود)
                 VStack {
                     Spacer()
                     HStack {
@@ -111,7 +124,7 @@ struct TodayReminder: View {
         }
     }
     
-    //Delete Function
+    // MARK: - Delete Function
     private func deletePlant(_ plant: Plant) {
         withAnimation {
             store.plants.removeAll { $0.id == plant.id }
@@ -119,7 +132,7 @@ struct TodayReminder: View {
     }
 }
 
-//Plant Row Component
+// MARK: - Plant Row Component
 struct PlantRowView: View {
     @EnvironmentObject var store: PlantStore
     let plant: Plant
@@ -146,7 +159,6 @@ struct PlantRowView: View {
             
             // Plant Info
             VStack(alignment: .leading, spacing: 4) {
-                // Room
                 HStack(spacing: 4) {
                     Image("Location")
                         .resizable()
@@ -156,13 +168,10 @@ struct PlantRowView: View {
                         .foregroundColor(.gray)
                 }
                 
-                // Plant Name
                 Text(plant.name)
                     .font(.system(size: 28, weight: .semibold))
                 
-                // Light & Water
                 HStack(spacing: 8) {
-                    // Light
                     HStack(spacing: 4) {
                         Image("FullSun")
                             .resizable()
@@ -177,7 +186,6 @@ struct PlantRowView: View {
                             .fill(Color.green.opacity(0.5))
                     )
                     
-                    // Water Amount
                     HStack(spacing: 4) {
                         Image("Drop")
                             .resizable()
