@@ -44,6 +44,10 @@ class TodayReminderViewModel: ObservableObject {
         }
     }
     
+    var allPlantsWatered: Bool {
+        !store.plants.isEmpty && store.plants.allSatisfy { $0.isWatered }
+    }
+    
     // MARK: - Actions
     func toggleWatered(plant: Plant) {
         guard let index = store.plants.firstIndex(where: { $0.id == plant.id }) else { return }

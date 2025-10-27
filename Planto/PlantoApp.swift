@@ -26,7 +26,7 @@ struct PlantoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SetUp()
+            Splash()
                 .environmentObject(store)
                 .preferredColorScheme(ColorScheme.dark)
         }

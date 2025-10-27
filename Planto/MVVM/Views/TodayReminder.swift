@@ -31,7 +31,6 @@ struct TodayReminder: View {
         }
     }
     
-    // ← جديد: تحقق إذا كل النباتات مسقية
     private var allPlantsWatered: Bool {
         !store.plants.isEmpty && store.plants.allSatisfy { $0.isWatered }
     }
@@ -39,184 +38,118 @@ struct TodayReminder: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // ← جديد: إذا كل النباتات مسقية
                 if allPlantsWatered {
                     AllDoneView()
                 } else {
-                    // الصفحة العادية
-                    VStack(spacing: 0) {
-                        // MARK: - Header Message
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(headerMessage)
-                                .font(.system(size: 17))
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal)
-                            
-                            // MARK: - Progress Bar
-                            ZStack(alignment: .leading) {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(width: 361, height: 8)
-                                    .cornerRadius(8)
-                                
-                                Rectangle()
-                                    .fill(Color.greeny)
-                                    .frame(width: 361 * progress, height: 8)
-                                    .cornerRadius(8)
-                                    .animation(.spring(), value: progress)
-                            }
-                            .padding(.horizontal)
-                        }
-                        .padding(.top, 8)
-                        
-                        // MARK: - Plants List
-                        List {
-                            ForEach(store.plants) { plant in
-                                PlantRowView(plant: plant, onEdit: {
-                                    plantToEdit = plant
-                                })
-                                .listRowInsets(EdgeInsets())
-                                .environmentObject(store)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        deletePlant(plant)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash.fill")
-                                    }
-                                }
-                            }
-                        }
-                        .listStyle(.plain)
-                    }
+                    mainContent
                 }
-                
-                // MARK: - Add Button (دايماً موجود)
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            showAddSheet = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(size: 24, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color.greeny)
-                                .clipShape(Circle())
-                                .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
-                        }
-                        .padding(.trailing, 24)
-                        .padding(.bottom, 24)
-                    }
-                }
+                addButton
             }
             .navigationTitle("My Plants 🌱")
         }
         .sheet(isPresented: $showAddSheet) {
-            SetReminder()
-                .environmentObject(store)
+            SetReminder().environmentObject(store)
         }
         .sheet(item: $plantToEdit) { plant in
-            SetReminder(plantToEdit: plant)
-                .environmentObject(store)
+            SetReminder(plantToEdit: plant).environmentObject(store)
         }
     }
     
-    // MARK: - Delete Function
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            headerSection
+            plantsList
+        }
+    }
+    
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(headerMessage)
+                .font(.system(size: 17))
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+            
+            progressBar
+        }
+        .padding(.top, 8)
+    }
+    
+    private var progressBar: some View {
+        ZStack(alignment: .leading) {
+            Rectangle()
+                .fill(Color.gray.opacity(0.2))
+                .frame(width: 361, height: 8)
+                .cornerRadius(8)
+            
+            Rectangle()
+                .fill(Color.greeny)
+                .frame(width: 361 * progress, height: 8)
+                .cornerRadius(8)
+                .animation(.spring(), value: progress)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var plantsList: some View {
+        List {
+            ForEach(store.plants) { plant in
+                PlantRowView(
+                    plant: plant,
+                    onToggle: { toggleWatered(plant: plant) },
+                    onEdit: { plantToEdit = plant }
+                )
+                .listRowInsets(EdgeInsets())
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        deletePlant(plant)
+                    } label: {
+                        Label("Delete", systemImage: "trash.fill")
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+    }
+    
+    private var addButton: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    showAddSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(Color.greeny)
+                        .clipShape(Circle())
+                        .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .padding(.trailing, 24)
+                .padding(.bottom, 24)
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    private func toggleWatered(plant: Plant) {
+        guard let index = store.plants.firstIndex(where: { $0.id == plant.id }) else { return }
+        store.plants[index].isWatered.toggle()
+    }
+    
     private func deletePlant(_ plant: Plant) {
+        print("🗑️ حذف نبتة: \(plant.name)")
+        print("📊 قبل الحذف: \(store.plants.count) نباتات")
+        
         withAnimation {
             store.plants.removeAll { $0.id == plant.id }
         }
-    }
-}
-
-// MARK: - Plant Row Component
-struct PlantRowView: View {
-    @EnvironmentObject var store: PlantStore
-    let plant: Plant
-    let onEdit: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            // Checkbox
-            Button {
-                toggleWatered()
-            } label: {
-                ZStack {
-                    Circle()
-                        .stroke(plant.isWatered ? Color.greeny : Color.gray, lineWidth: 2)
-                        .frame(width: 23, height: 23)
-                    
-                    if plant.isWatered {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.greeny)
-                    }
-                }
-            }
-            
-            // Plant Info
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Image("Location")
-                        .resizable()
-                        .frame(width: 12, height: 12)
-                    Text("in \(plant.room)")
-                        .font(.system(size: 13))
-                        .foregroundColor(.gray)
-                }
-                
-                Text(plant.name)
-                    .font(.system(size: 28, weight: .semibold))
-                
-                HStack(spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image("FullSun")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                        Text(plant.light)
-                            .font(.system(size: 13))
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.green.opacity(0.5))
-                    )
-                    
-                    HStack(spacing: 4) {
-                        Image("Drop")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                        Text(plant.waterAmount)
-                            .font(.system(size: 13))
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.gray.opacity(0.5))
-                    )
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                onEdit()
-            }
-            
-            Spacer()
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(plant.isWatered ? Color.green.opacity(0.05) : Color.clear)
-    }
-    
-    private func toggleWatered() {
-        if let index = store.plants.firstIndex(where: { $0.id == plant.id }) {
-            store.plants[index].isWatered.toggle()
-        }
+        
+        print("📊 بعد الحذف: \(store.plants.count) نباتات")
+        print("📋 النباتات المتبقية: \(store.plants.map { $0.name })")
     }
 }
 

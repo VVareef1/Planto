@@ -10,46 +10,39 @@ import Combine
 
 class NotificationViewModel: ObservableObject {
     
-    // طلب الإذن للإشعارات
     func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            print(granted ? "✅ الإشعارات مسموح بها" : "❌ الإشعارات مرفوضة")
+            print(granted ? "✅ Notifications allowed" : "❌ Notifications denied")
         }
     }
     
-    // إشعار ترحيبي بسيط عند فتح التطبيق
     func sendWelcomeNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Planto 🌿"
-        content.body = "مرحبًا بك! لا تنسَ سقي نباتك اليوم 💧"
+        content.body = "Welcome! Don't forget to water your plant today 💧"
         content.sound = .default
         
-        // بعد 3 ثواني من فتح التطبيق
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
     }
     
-    // إشعار تذكير لتجارب سريعة (بالثواني)
     func schedulePlantReminder(plantName: String, after seconds: Double) {
         let content = UNMutableNotificationContent()
-        content.title = "💧 تذكير بالسقي"
-        content.body = "حان وقت سقي \(plantName) 🌿"
+        content.title = "💧 Watering Reminder"
+        content.body = "It's time to water me! \(plantName) 🌿"
         content.sound = .default
 
-        // يرسل الإشعار بعد عدد الثواني المحددة
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("⚠️ خطأ في جدولة إشعار \(plantName): \(error.localizedDescription)")
+                print("⚠️ Error scheduling notification for \(plantName): \(error.localizedDescription)")
             } else {
-                print("✅ تم جدولة تذكير سقي \(plantName) بعد \(seconds) ثانية")
+                print("✅ Watering reminder for \(plantName) scheduled after \(seconds) seconds")
             }
         }
     }
 }
-
-

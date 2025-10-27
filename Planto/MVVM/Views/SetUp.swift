@@ -3,7 +3,8 @@ import SwiftUI
 struct SetUp: View {
     @State private var showSheet = false
     @EnvironmentObject var store: PlantStore
-    @StateObject private var notificationVM = NotificationViewModel()  // ← هذا السطر جديد
+    @StateObject private var notificationVM = NotificationViewModel()
+    
     
     var body: some View {
         Group {
@@ -17,7 +18,7 @@ struct SetUp: View {
         }
         .animation(.easeInOut(duration: 0.5), value: store.plants.isEmpty)
         .onAppear {
-            notificationVM.requestPermission()  // ← هذا السطر جديد
+            notificationVM.requestPermission()
         }
     }
 }
