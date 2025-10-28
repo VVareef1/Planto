@@ -1,4 +1,4 @@
-🌿 Planto Plant Care Reminder
+## 🌿 Planto Plant Care Reminder
 A beautiful and intuitive iOS app to help you take care of your plants by sending timely watering reminders.
 
 📱 About
@@ -29,28 +29,6 @@ Never forget to water your plants again with smart notifications and easy-to-use
 - iOS 15.0 or later
 - macOS 12.0 or later (for development)
 
-## 🚀 Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/planto.git
-```
-
-2. Open the project in Xcode:
-```bash
-cd planto
-open Planto.xcodeproj
-```
-
-3. Select your development team in Signing & Capabilities
-
-4. Build and run the project (⌘ + R)
-
-## 📸 Screenshots
-
-<!-- Add your screenshots here -->
-_Coming soon..._
-
 ## 🎯 How to Use
 
 1. **Add a Plant**: Tap the '+' button to add a new plant
@@ -62,47 +40,42 @@ _Coming soon..._
 ## 🏗 Project Structure
 ```
 Planto/
-├── Models/
-│   ├── Plant.swift
-│   └── PlantStore.swift
-├── ViewModels/
-│   ├── NotificationViewModel.swift
-│   └── SetReminderViewModel.swift
-├── Views/
-│   ├── ContentView.swift
-│   ├── SetReminder.swift
-│   └── Components/
-└── Assets/
+├── Planto/
+│   ├── MVVM/
+│   │   ├── Model/
+│   │   │   └── Plant.swift
+│   │   └── ViewModels/
+│   │       ├── NotificationViewModel.swift
+│   │       ├── SetReminderViewModel.swift
+│   │       ├── TodayReminderViewModel.swift
+│   │       └── ViewModel.swift
+│   ├── Views/
+│   │   ├── AllDoneView.swift
+│   │   ├── PlantRowView.swift
+│   │   ├── SetReminder.swift
+│   │   ├── SetUp.swift
+│   │   ├── Splash.swift
+│   │   ├── TodayReminder.swift
+│   │   └── plant_animation
+│   ├── Assets/
+│   ├── Item.swift
+│   └── PlantoApp.swift
+├── PlantoTests/
+│   └── PlantoTests.swift
+└── PlantoUITests/
+    ├── PlantoUITests.swift
+    └── PlantoUITestsLaunchTests.swift
 ```
 
-## 🤝 Contributing
+### 📂 File Descriptions
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- **MVVM/Model**: Data models (Plant structure)
+- **MVVM/ViewModels**: Business logic and state management
+- **Views**: All SwiftUI view components
+- **Assets**: Images, colors, and other resources
+- **PlantoApp.swift**: Main app entry point
+- **Tests**: Unit and UI tests
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
-## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Wareef Saeed Alzahrani**
-
-## 🙏 Acknowledgments
-
-- Plant icons and images
-- SwiftUI community
-- All plant lovers who inspired this project
-
-## 📞 Support
-
-If you have any questions or suggestions, feel free to open an issue or contact me.
-
----
-
-Made with ❤️ and SwiftUI
+Made by Wareef S. Alzahrani with ❤️ and SwiftUI
